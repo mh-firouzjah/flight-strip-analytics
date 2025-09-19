@@ -1,0 +1,54 @@
+[project]
+name = "flight-strip-administration"
+version = "0.1.0"
+description = "A Django-based ETL application for importing, validating, and managing flight strip records from Excel files. Features include high-performance data validation with Polars and a secure admin interface."
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Mahdi Firouzjah", email = "mh.firouzjah@gmail.com" },
+]
+license = { text = "MIT License" }
+keywords = ["django", "etl", "data-validation", "polars", "flight-strips", "aviation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "dj-database-url>=3.0.1",
+    "django>=5.2.6",
+    "djlint>=1.36.4",
+    "fastexcel>=0.15.1",
+    "humanize>=4.13.0",
+    "polars>=1.33.1",
+    "psycopg[binary]>=3.2.10",
+    "pyarrow>=21.0.0",
+    "python-decouple>=3.8",
+    "xlsxwriter>=3.2.8",
+]
+
+
+[dependency-groups]
+dev = [
+    "djlint>=1.36.4",
+    "django-debug-toolbar>=6.0.0",
+    "ipython>=9.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/flight-strip-administration"
+Repository = "https://github.com/your-username/flight-strip-administration"
+"Bug Tracker" = "https://github.com/your-username/flight-strip-administration/issues"
+
+[tool.ruff]
+line-length = 110
