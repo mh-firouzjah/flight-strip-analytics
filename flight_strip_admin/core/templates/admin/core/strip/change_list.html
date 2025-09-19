@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if perms.core.import_strip %}
+    <li>
+      <a href="{% url 'admin:core_strip_import_excel' %}"
+         class="btn btn-primary">{% translate "Import Excel" %}</a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

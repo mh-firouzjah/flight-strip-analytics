@@ -1,0 +1,113 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+  {{ form.media }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo;
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo;
+    {% if has_view_permission %}
+      <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    {% else %}
+      {{ opts.verbose_name_plural|capfirst }}
+    {% endif %}
+    &rsaquo;{% blocktranslate with name=opts.verbose_name %}Import {{ name }} excel{% endblocktranslate %}
+  </div>
+{% endblock %}
+
+{% block content %}
+  {% translate 'This importer will import the following fields: ' %}
+  <p>
+    <code>{{ fields_list|join:', ' }}</code>
+  </p>
+
+  <div class="module">
+    <form id="import-form"
+          action="{% url 'admin:core_strip_import_excel' %}"
+          method="post"
+          enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <fieldset class="module aligned">
+        {% for field in form.visible_fields %}
+          <div class="form-row">
+            {{ field.errors }}
+
+            {{ field.label_tag }}
+
+            {% if field.field.widget.attrs.readonly %}
+              {{ field.field.value }}
+              {{ field.as_hidden }}
+            {% else %}
+              {{ field }}
+            {% endif %}
+
+            {% if field.field.help_text %}<p class="help">{{ field.field.help_text|safe }}</p>{% endif %}
+          </div>
+        {% endfor %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+      </fieldset>
+
+      {{ form.non_field_errors }}
+
+      <div class="submit-row">
+        <input type="submit"
+               id="import-submit"
+               class="default"
+               value="{% translate 'Submit' %}" />
+      </div>
+    </form>
+  </div>
+
+  {% if errors_df %}
+    <div class="module" style="overflow-x: auto;">
+      <h2>Import Errors</h2>
+      <div class="results">
+        <table>
+          <thead>
+            <tr>
+              {% for header in error_headers %}
+                <th>
+                  <div class="text">
+                    <span>{{ header|title }}</span>
+                  </div>
+                </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in errors_df %}
+              <tr class="{% cycle 'row1' 'row2' %}">
+                {% for col in row %}<td>{{ col|safe }}</td>{% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+{% endblock content %}
+
+{% block extrabody %}
+  <script>
+    const form = document.querySelector('#import-form');
+    const submitButton = document.querySelector('#import-submit');
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      submitButton.disabled = true;
+      const originalText = submitButton.value;
+      submitButton.value = 'Importing, please wait...';
+
+      event.target.submit();
+    });
+  </script>
+{% endblock extrabody %}
