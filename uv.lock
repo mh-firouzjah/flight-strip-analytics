@@ -172,6 +172,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pyarrow" },
     { name = "python-decouple" },
+    { name = "xlsxwriter" },
 ]
 
 [package.dev-dependencies]
@@ -179,9 +180,6 @@ dev = [
     { name = "django-debug-toolbar" },
     { name = "djlint" },
     { name = "ipython" },
-]
-test = [
-    { name = "xlsxwriter" },
 ]
 
 [package.metadata]
@@ -195,6 +193,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.10" },
     { name = "pyarrow", specifier = ">=21.0.0" },
     { name = "python-decouple", specifier = ">=3.8" },
+    { name = "xlsxwriter", specifier = ">=3.2.8" },
 ]
 
 [package.metadata.requires-dev]
@@ -203,7 +202,6 @@ dev = [
     { name = "djlint", specifier = ">=1.36.4" },
     { name = "ipython", specifier = ">=9.5.0" },
 ]
-test = [{ name = "xlsxwriter", specifier = ">=3.2.8" }]
 
 [[package]]
 name = "humanize"
