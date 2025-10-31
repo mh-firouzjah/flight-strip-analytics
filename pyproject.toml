@@ -43,6 +43,7 @@ dev = [
     "djlint>=1.36.4",
     "django-debug-toolbar>=6.0.0",
     "ipython>=9.5.0",
+    "django-types>=0.22.0",
 ]
 
 [project.urls]

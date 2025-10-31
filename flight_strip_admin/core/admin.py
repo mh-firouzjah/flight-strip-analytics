@@ -1,5 +1,6 @@
 import logging
 from time import perf_counter
+from typing import Any
 
 from django.conf import settings
 from django.contrib import admin, messages
@@ -14,7 +15,8 @@ from humanize import naturalsize, precisedelta
 
 from .forms import ExcelUploadForm
 from .handlers.db import reconcile_journeys, upsert_strips_from_df
-from .handlers.excel import NoDataError, process_excel_bytes
+from .handlers.process_df import compute_journeys_and_sector_end, refine_df
+from .handlers.validate_excel import NoDataError, load_and_validate_excel
 from .models import AuditLog, Strip
 
 logger = logging.getLogger(__name__)
@@ -109,17 +111,17 @@ class StripAdmin(admin.ModelAdmin):
             filesize = excel_file.size
             elapsed = perf_counter() - start_time
 
-            valid_df, errors_df = process_excel_bytes(excel_bytes, year)
+            valid_df, errors_df = load_and_validate_excel(excel_bytes, year)
             if (valid_df is None or valid_df.is_empty()) and (errors_df is None or errors_df.is_empty()):
                 return self._handle_no_effect_file(request, filename, filesize, elapsed)
             if errors_df is not None and not errors_df.is_empty():
                 return self._handle_error_prone_file(request, form, filename, filesize, errors_df, elapsed)
-            return self._process_data(request, valid_df, filename, filesize, start_time)
+            return self._process_data(request, valid_df, year, filename, filesize, start_time)
         except Exception as err:
             return self._handle_exception(request, excel_file, err, perf_counter() - start_time)
 
-    def _validate_file(self, file: UploadedFile | None):
-        if not file:
+    def _validate_file(self, file: Any) -> UploadedFile:
+        if not file or not isinstance(file, UploadedFile):
             raise ValidationError("No file uploaded.")
         if file.content_type not in settings.UPLOADFILE_ALLOWED_TYPES:
             raise ValidationError("Invalid file type.")
@@ -169,9 +171,13 @@ class StripAdmin(admin.ModelAdmin):
         }
         return self._render_form(request, context)
 
-    def _process_data(self, request, valid_df, filename, filesize, start_time):
+    def _process_data(self, request, valid_df, year, filename, filesize, start_time):
         db_start_time = perf_counter()
-        sec_up, upsert_df = reconcile_journeys(valid_df)
+        refined_df = refine_df(valid_df, year)
+        sec_up, reconciled_df = reconcile_journeys(refined_df)
+        upsert_df = compute_journeys_and_sector_end(reconciled_df)
+        print(upsert_df)
+        return
         with transaction.atomic(), connection.cursor() as cursor:
             db_op = upsert_strips_from_df(cursor, upsert_df)
 
